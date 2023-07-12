@@ -2,7 +2,7 @@ import { Component, ErrorInfo, ReactNode } from 'react'
 import type { Location } from 'react-router-dom'
 import WithLocationProps from '../interfaces/WithLocationProps'
 import withLocation from '../helpers/withHistory'
-import { ErrorPage } from './error-page'
+import { CCErrorPage } from './error-page'
 
 interface ErrorBoundaryProps extends WithLocationProps {
   children: ReactNode
@@ -71,7 +71,7 @@ class ErrorBoundaryBase extends Component<ErrorBoundaryProps, ErrorBoundaryState
 
   render() {
     if (this.state.hasError) {
-      return <ErrorPage />
+      return this.props.errorPage ? this.props.errorPage : <CCErrorPage />
     }
 
     return <div>{this.props.children}</div>
@@ -82,4 +82,4 @@ const LOCATION_HISTORY_DEFAULT_SIZE = 100
 ErrorBoundaryBase.defaultProps = {
   locationHistorySize: LOCATION_HISTORY_DEFAULT_SIZE,
 }
-export const ErrorBoundary = withLocation(ErrorBoundaryBase)
+export const CCErrorBoundary = withLocation(ErrorBoundaryBase)

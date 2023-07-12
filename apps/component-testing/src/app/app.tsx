@@ -1,9 +1,8 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Link, Route, Routes } from 'react-router-dom'
 import type { Location } from 'react-router-dom'
 import ErrorBoundaryTest from '../pages/errorBoundaryTest'
 import UploadTest from '../pages/uploadTest'
-import { ErrorBoundary } from '@codecontrol/error-boundary'
+import { CCErrorBoundary, CCErrorPage } from '@codecontrol/error-boundary'
 
 export function App() {
   const routes = [
@@ -38,13 +37,16 @@ export function App() {
           ))}
         </ul>
       </div>
-      <ErrorBoundary onError={handleError}>
+      <CCErrorBoundary
+        onError={handleError}
+        errorPage={<CCErrorPage translation={{ header: 'Whoops error', paragraph: 'Oh no' }} />}
+      >
         <Routes>
           {routes.map((route, index) => (
             <Route key={index} path={route.to} element={route.element} />
           ))}
         </Routes>
-      </ErrorBoundary>
+      </CCErrorBoundary>
     </div>
   )
 }

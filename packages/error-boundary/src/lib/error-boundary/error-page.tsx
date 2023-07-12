@@ -6,15 +6,15 @@ interface ErrorPageTranslations {
   paragraph?: string | ReactNode
 }
 interface ErrorPageProps {
-  image?: string
   translation?: ErrorPageTranslations
 }
 
 const defaultTranslations: ErrorPageTranslations = {
-  header: 'Hups, sivulla tapahtui odottamaton virhe',
-  paragraph: 'Lataa sivu uudelleen tai palaa etusivulle korjataksesi ongelman',
+  header: 'Whoops, it seems we have encountered unexpected error',
+  paragraph: 'Go back or reload site to try fixing the problem',
 }
-export function ErrorPage({ image, translation = defaultTranslations }: ErrorPageProps = {}) {
+
+export function CCErrorPage({ translation = defaultTranslations }: ErrorPageProps = {}) {
   return (
     <div className={styles.container}>
       <div className={styles.textContainer}>
@@ -29,7 +29,6 @@ export function ErrorPage({ image, translation = defaultTranslations }: ErrorPag
           translation?.paragraph
         )}
       </div>
-      {image && <img src={image} alt='Error' />}
     </div>
   )
 }
