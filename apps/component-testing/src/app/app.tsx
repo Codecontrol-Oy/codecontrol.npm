@@ -24,6 +24,7 @@ export function App() {
     },
   ]
   const handleError = (error: Error, locationHistory: Location[]) => {
+    // eslint-disable-next-line no-console
     console.log({ error, locationHistory })
   }
   return (
@@ -37,7 +38,7 @@ export function App() {
           ))}
         </ul>
       </div>
-      <ErrorBoundary onError={handleError} key={location.pathname}>
+      <ErrorBoundary onError={handleError}>
         <Routes>
           {routes.map((route, index) => (
             <Route key={index} path={route.to} element={route.element} />

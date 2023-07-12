@@ -36,7 +36,7 @@ class ErrorBoundaryBase extends Component<ErrorBoundaryProps, ErrorBoundaryState
     this.setState({ ...this.state, locationHistory: [this.props.location, ...this.state.locationHistory] })
   }
 
-  componentDidUpdate(prevProps: Readonly<ErrorBoundaryProps>, prevState: Readonly<ErrorBoundaryState>, snapshot?: any) {
+  componentDidUpdate(prevProps: Readonly<ErrorBoundaryProps>, _prevState: Readonly<ErrorBoundaryState>) {
     const {
       pathname: currentPathname,
       state: currentState,
