@@ -1,0 +1,24 @@
+.container {
+    position: relative;
+}
+
+.textContainer {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+.paragraph, .header{
+    color: inherit;
+    font-family: inherit;
+    margin: 0;
+}
+
+.header {
+    font-size: 3rem;
+}
+
+.paragraph {
+    margin-top: 2rem;
+    flex-grow: 1;
+}
