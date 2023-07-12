@@ -6,10 +6,10 @@
   "scripts": {
     "build": "vite build"
   },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/",
-    "access": "restricted",
-    "scope": "@codecontrol-oy"
+  "files": ["build"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Codecontrol-Oy/codecontrol.npm"
   },
   "exports": {
     ".": {
