@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@codecontrol/error-boundary": ["packages/error-boundary/src/index.ts"]
+      "@codecontrol/error-boundary": ["packages/error-boundary/src/index.ts"],
+      "@codecontrol/nx-packages": ["packages/plugins/nx-packages/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

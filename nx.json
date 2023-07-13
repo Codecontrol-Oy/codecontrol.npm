@@ -37,6 +37,12 @@
     },
     "test": {
       "inputs": ["default", "^default"]
+    },
+    "publish": {
+      "dependsOn": ["build"]
+    },
+    "build": {
+      "dependsOn": ["^build"]
     }
   }
 }

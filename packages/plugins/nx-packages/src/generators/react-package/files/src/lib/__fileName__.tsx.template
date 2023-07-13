@@ -1,0 +1,9 @@
+interface <%= className %>Props {
+
+}
+
+export default function <%= className %>({}: <%= className %>Props) {
+    return (
+    <div><%= className %></div>
+    )
+}
