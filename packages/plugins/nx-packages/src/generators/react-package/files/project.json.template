@@ -1,7 +1,7 @@
 {
-  "name": "<%= name %>",
+  "name": "<%= originalName %>",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/<%= name %>/src",
+  "sourceRoot": "packages/<%= originalName %>/src",
   "projectType": "library",
   "tags": [],
   "targets": {
@@ -9,7 +9,7 @@
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/<%= name %>/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": ["packages/<%= originalName %>/**/*.{ts,tsx,js,jsx}"]
       }
     }
   }
