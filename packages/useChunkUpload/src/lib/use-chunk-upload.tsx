@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   Chunk,
   ChunkedFile,
@@ -37,11 +37,9 @@ type UploadingFile = {
   uid: string
 }
 const DEFAULT_CHUNKSIZE = 5 * 1024 * 1024
-export function useChunkUpload<T>(
-  url: string,
-  options: RequestOptions
-): { uploadFile: (file: File, uid: string, callback?: UploadCallback) => Promise<ChunkedUploadSuccess<T>> } {
+export function useChunkUpload<T>(url: string, options: RequestOptions) {
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([])
+  const uploadRef = useRef<UploadingFile[]>([])
   const defaultOptions: RequestOptionsWithDefaults = {
     retryCount: 3,
     chunkSize: DEFAULT_CHUNKSIZE,
@@ -55,23 +53,25 @@ export function useChunkUpload<T>(
 
   const uploadFile = async (file: File, uid: string, callback?: UploadCallback) => {
     const chunkedFile = getChunkedFile(file, opt.chunkSize, uid, callback)
-
-    setUploadingFiles([{ chunkedFile, percentage: 0, status: 'uploading', uid }, ...uploadingFiles])
-    const progressInterval = setInterval(() => {
-      if (callback) callback(getProgress(chunkedFile))
-    }, opt.progressPollInterval)
-    const cb = (n: number) => console.log({ n })
-
-    return uploadChunkedFile<T>(url, cb, opt, chunkedFile)
+    uploadRef.current = [{ chunkedFile, percentage: 0, status: 'uploading', uid }, ...uploadRef.current]
+    return uploadChunkedFile<T>(url, chunkedFile, opt, (n) => {
+      const file = uploadRef.current.find((f) => f.uid === uid)
+      console.log({ file })
+      if (!file) return
+      file.percentage = Math.floor(100 * n)
+      console.log({ uploadFiles: uploadRef.current })
+      setUploadingFiles(uploadRef.current)
+    })
       .then((result) => {
         console.log({ result })
         console.log('finally uploaded')
         console.log(chunkedFile)
+        uploadRef.current = uploadRef.current.filter((x) => x.uid !== uid)
+        setUploadingFiles(uploadRef.current)
         return result
       })
       .catch((error) => console.log(error))
-      .finally(() => clearInterval(progressInterval))
   }
 
-  return { uploadFile }
+  return { uploadFile, uploadingFiles, uploadRef }
 }

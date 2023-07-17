@@ -63,7 +63,7 @@ async function uploadFileChunk<T>(
   url: string,
   chunk: Chunk,
   chunkedFile: ChunkedFile,
-  callback: (n: number) => void,
+  cb: (n: number) => void,
   options: RequestOptionsWithDefaults
 ) {
   const headers = new Headers()
@@ -85,13 +85,12 @@ async function uploadFileChunk<T>(
     xhr.upload.addEventListener('progress', (event) => {
       if (event.lengthComputable) {
         chunk.uploaded = chunk.blob.size < event.loaded ? chunk.blob.size : event.loaded
-        callback(chunk.uploaded)
+        cb(getProgress(chunkedFile))
       }
     })
     xhr.addEventListener('loadend', () => {
       console.log('finished')
       chunk.isUploaded = true
-      console.log({ chunk, chunkedFile })
       resolve(xhr.readyState === 4 && xhr.status === 200)
     })
     xhr.open('POST', url, true)
@@ -99,30 +98,23 @@ async function uploadFileChunk<T>(
   })
 
   return JSON.parse(xhr.response) as T
-
-  // return fetch(url, { headers, body: data, method: 'POST' }).then((r) => {
-  //   chunk.isUploaded = true
-  //   if (chunkedFile.callback) chunkedFile.callback(chunk, chunkedFile)
-  //   return r.json() as T
-  // })
 }
 
 export async function uploadChunkedFile<T>(
   url: string,
-  callback: (n: number) => void,
+  chunkedFile: ChunkedFile,
   options: RequestOptionsWithDefaults,
-  chunkedFile: ChunkedFile
+  cb: (n: number) => void
 ): Promise<ChunkedUploadSuccess<T>> {
   try {
     const chunkCount = chunkedFile.chunks.length
-    if (chunkCount >= 2) await uploadFileChunk<T>(url, chunkedFile.chunks[0], chunkedFile, callback, options)
+    if (chunkCount >= 2) await uploadFileChunk<T>(url, chunkedFile.chunks[0], chunkedFile, cb, options)
     const middlePartsUploadPromises = chunkedFile.chunks
       .slice(1, -1)
       .filter((chunk) => !chunk.uploaded)
-      .map((chunk) => uploadFileChunk<T>(url, chunk, chunkedFile, callback, options))
-    console.log({ middlePartsUploadPromises })
+      .map((chunk) => uploadFileChunk<T>(url, chunk, chunkedFile, cb, options))
     await Promise.all(middlePartsUploadPromises)
-    const last = await uploadFileChunk<T>(url, chunkedFile.chunks[chunkCount - 1], chunkedFile, callback, options)
+    const last = await uploadFileChunk<T>(url, chunkedFile.chunks[chunkCount - 1], chunkedFile, cb, options)
 
     if (!last) throw new UploadFailedError('Failed to upload', chunkedFile)
 
