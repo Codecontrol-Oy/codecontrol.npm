@@ -1,0 +1,16 @@
+{
+  "name": "useChunkUpload",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/useChunkUpload/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/useChunkUpload/**/*.{ts,tsx,js,jsx}"]
+      }
+    }
+  }
+}
