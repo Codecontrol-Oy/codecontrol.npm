@@ -7,9 +7,14 @@
     "build": "vite build"
   },
   "files": ["build"],
+  "publishConfig": {
+    "access": "public",
+    "scope": "@codecontrol"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Codecontrol-Oy/codecontrol.npm"
+    "url": "https://github.com/Codecontrol-Oy/codecontrol.npm",
+    "directory": "packages/error-boundary"
   },
   "exports": {
     ".": {
