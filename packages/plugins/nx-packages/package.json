@@ -1,0 +1,9 @@
+{
+  "name": "@codecontrol/nx-packages",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "generators": "./generators.json",
+  "publishConfig": {
+"access": "public"
+  }
+}
