@@ -1,26 +1,27 @@
 {
-  "name": "use-chunk-upload",
-  "version": "1.0.0",
-  "main": "./index.js",
-  "types": "./index.d.ts",
+  "name": "@codecontrol/use-chunk-upload",
+  "version": "1.0.2",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
   "scripts": {
-    "build": "vite build",
-    "publish": "npm publish"
+    "build": "vite build"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "scope": "@codecontrol"
   },
   "files": [
     "build"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Codecontrol-Oy/codecontrol.npm/tree/main/packages/useChunkUpload"
+    "url": "https://github.com/Codecontrol-Oy/codecontrol.npm",
+    "directory": "packages/useChunkUpload"
   },
   "exports": {
     ".": {
-      "import": "./index.mjs",
-      "require": "./index.js"
+      "import": "./build/index.mjs",
+      "require": "./build/index.js"
     }
   },
   "peerDependencies": {

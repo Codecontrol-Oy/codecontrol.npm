@@ -1,20 +1,25 @@
 {
   "name": "@codecontrol/error-boundary",
-  "version": "1.0.0",
-  "main": "./index.js",
-  "types": "./index.d.ts",
+  "version": "1.0.1",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
   "scripts": {
     "build": "vite build"
   },
   "files": ["build"],
+  "publishConfig": {
+    "access": "public",
+    "scope": "@codecontrol"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Codecontrol-Oy/codecontrol.npm"
+    "url": "https://github.com/Codecontrol-Oy/codecontrol.npm",
+    "directory": "packages/error-boundary"
   },
   "exports": {
     ".": {
-      "import": "./index.mjs",
-      "require": "./index.js"
+      "import": "./build/index.mjs",
+      "require": "./build/index.js"
     }
   },
   "peerDependencies": {
