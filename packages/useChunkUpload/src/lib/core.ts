@@ -1,27 +1,6 @@
-import UploadFailedError from './UploadFailedError'
-import { RequestOptionsWithDefaults } from './use-chunk-upload'
-
-//region types
-export interface Chunk {
-  blob: Blob
-  index: number
-  isUploaded: boolean
-  uploaded: number
-}
-export interface ChunkedFile {
-  chunks: Chunk[]
-  originalFile: File
-  uid: string
-  callback?: UploadCallback
-}
-
-export type UploadCallback = (progress: number) => void
-export interface ChunkedUploadSuccess<T> {
-  result: T
-  file: File
-  uid: string
-}
-//endregion
+import { Chunk, ChunkedFile, ChunkedUploadSuccess, UploadCallback } from './public-types'
+import { RequestOptionsWithDefaults } from './internal-types'
+import { UploadFailedError } from './UploadFailedError'
 
 export function getChunkedFile(file: File, chunkSize: number, uid: string, callback?: UploadCallback): ChunkedFile {
   let start = 0
@@ -42,79 +21,72 @@ export function getChunkedFile(file: File, chunkSize: number, uid: string, callb
   }
 }
 
-// export function getChunkedFiles(files: File | File[] | FileList, chunkSize: number, uid: string) {
-//   let chunkedFiles: ChunkedFile[]
-//   if (files instanceof FileList) {
-//     const tempFiles: File[] = []
-//     for (let i = 0; i < files.length; i++) {
-//       const item = files.item(i)
-//       if (item) tempFiles.push(item)
-//     }
-//     chunkedFiles = tempFiles.map((f) => chunkFile(f, chunkSize, uid))
-//   } else if (Array.isArray(files)) {
-//     chunkedFiles = files.map((f) => chunkFile(f, chunkSize, uid))
-//   } else {
-//     chunkedFiles = [chunkFile(files, chunkSize, uid)]
-//   }
-//   return chunkedFiles
-// }
-
 async function uploadFileChunk<T>(
   url: string,
   chunk: Chunk,
   chunkedFile: ChunkedFile,
-  cb: (n: number) => void,
   options: RequestOptionsWithDefaults
 ) {
   const headers = new Headers()
   if (options.headers.Authorization) headers.append('Authorization', options.headers.Authorization)
 
-  const data = new FormData()
-  const blob = new Blob([chunk.blob], { type: chunkedFile.originalFile.type })
+  let data: FormData
   if (options.setFormData) {
-    options.setFormData(data, chunk, chunkedFile)
+    data = options.setFormData(chunk, chunkedFile)
   } else {
+    data = new FormData()
+    const blob = new Blob([chunk.blob], { type: chunkedFile.originalFile.type })
     data.append('file', blob, chunkedFile.originalFile.name)
     data.append('metadata.uploadUid', chunkedFile.uid)
     data.append('metadata.chunkIndex', chunk.index.toString())
     data.append('metadata.totalChunks', chunkedFile.chunks.length.toString())
     data.append('metadata.totalFileSize', chunkedFile.originalFile.size.toString())
   }
+
   const xhr = new XMLHttpRequest()
-  await new Promise((resolve) => {
+  const success = await new Promise((resolve) => {
     xhr.upload.addEventListener('progress', (event) => {
       if (event.lengthComputable) {
         chunk.uploaded = chunk.blob.size < event.loaded ? chunk.blob.size : event.loaded
-        cb(getProgress(chunkedFile))
+        if (chunkedFile.callback) chunkedFile.callback(getProgress(chunkedFile), chunkedFile.uid)
       }
     })
     xhr.addEventListener('loadend', () => {
-      console.log('finished')
-      chunk.isUploaded = true
-      resolve(xhr.readyState === 4 && xhr.status === 200)
+      resolve(xhr.readyState === 4 && Math.floor(xhr.status / 100) === 2)
     })
     xhr.open('POST', url, true)
     xhr.send(data)
   })
 
-  return JSON.parse(xhr.response) as T
+
+  const response = JSON.parse(xhr.response)
+
+  if (success) {
+    chunk.isUploaded = true
+    return response as T
+  }
+
+  chunk.isUploaded = false
+  chunk.uploaded = 0
+  throw new UploadFailedError('Upload failed', chunkedFile, response)
 }
 
 export async function uploadChunkedFile<T>(
   url: string,
   chunkedFile: ChunkedFile,
-  options: RequestOptionsWithDefaults,
-  cb: (n: number) => void
+  options: RequestOptionsWithDefaults
 ): Promise<ChunkedUploadSuccess<T>> {
   try {
-    const chunkCount = chunkedFile.chunks.length
-    if (chunkCount >= 2) await uploadFileChunk<T>(url, chunkedFile.chunks[0], chunkedFile, cb, options)
-    const middlePartsUploadPromises = chunkedFile.chunks
+    const chunks = chunkedFile.chunks.filter((c) => !c.uploaded)
+    const chunkCount = chunks.length
+
+    if (chunkCount >= 2) await uploadFileChunk<T>(url, chunks[0], chunkedFile, options)
+
+    const middlePartsUploadPromises = chunks
       .slice(1, -1)
-      .filter((chunk) => !chunk.uploaded)
-      .map((chunk) => uploadFileChunk<T>(url, chunk, chunkedFile, cb, options))
+      .map((chunk) => uploadFileChunk<T>(url, chunk, chunkedFile, options))
     await Promise.all(middlePartsUploadPromises)
-    const last = await uploadFileChunk<T>(url, chunkedFile.chunks[chunkCount - 1], chunkedFile, cb, options)
+    const last = await uploadFileChunk<T>(url, chunks[chunkCount - 1], chunkedFile, options)
 
     if (!last) throw new UploadFailedError('Failed to upload', chunkedFile)
 
@@ -124,10 +96,13 @@ export async function uploadChunkedFile<T>(
       uid: chunkedFile.uid,
     }
   } catch (error) {
-    if (error instanceof Error) {
-      throw new UploadFailedError(error.message, chunkedFile, error)
+    if (error instanceof UploadFailedError) {
+      throw error
     }
-    throw new UploadFailedError('No error message was thrown', chunkedFile)
+    if (error instanceof Error) {
+      throw new UploadFailedError(error.message, chunkedFile, undefined, error)
+    }
+    throw new UploadFailedError('No actual error was thrown', chunkedFile)
   }
 }
 

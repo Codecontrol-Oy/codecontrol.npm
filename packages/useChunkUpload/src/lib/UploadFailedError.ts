@@ -1,12 +1,14 @@
-import { ChunkedFile } from './core'
+import { ChunkedFile } from "./public-types"
 
-export default class UploadFailedError extends Error {
+export class UploadFailedError extends Error {
   chunkedFile: ChunkedFile
+  response?: object
   originalError?: Error
 
-  constructor(message: string, chunkedFile: ChunkedFile, originalError?: Error) {
+  constructor(message: string, chunkedFile: ChunkedFile, response?: object, originalError?: Error) {
     super(message)
     this.chunkedFile = chunkedFile
+    this.response = response
     this.originalError = originalError
   }
 }
