@@ -27,9 +27,6 @@ async function uploadFileChunk<T>(
   chunkedFile: ChunkedFile,
   options: RequestOptionsWithDefaults
 ) {
-  const headers = new Headers()
-  if (options.headers.Authorization) headers.append('Authorization', options.headers.Authorization)
-
   let data: FormData
   if (options.setFormData) {
     data = options.setFormData(chunk, chunkedFile)
@@ -55,9 +52,11 @@ async function uploadFileChunk<T>(
       resolve(xhr.readyState === 4 && Math.floor(xhr.status / 100) === 2)
     })
     xhr.open('POST', url, true)
+    if (options.headers.Authorization) {
+      xhr.setRequestHeader('Authorization', options.headers.Authorization)
+    }
     xhr.send(data)
   })
-
 
   const response = JSON.parse(xhr.response)
 
