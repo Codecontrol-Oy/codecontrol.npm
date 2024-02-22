@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Language {
+  id           Int           @id @default(autoincrement())
+  name         String        @unique
+  translations Translation[]
+}
+
+model Namespace {
+  id           Int           @id @default(autoincrement())
+  name         String        @unique
+  translations Translation[]
+}
+
+model Translation {
+  id          Int       @id @default(autoincrement())
+  key         String
+  value       String    @default("")
+  languageId  Int
+  language    Language  @relation(fields: [languageId], references: [id])
+  namespaceId Int
+  namespace   Namespace @relation(fields: [namespaceId], references: [id])
+}
