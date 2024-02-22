@@ -1,4 +1,4 @@
-import { uploadChunkedFile, getChunkedFile } from './core'
+import { getChunkedFile, uploadChunkedFile } from './core'
 import { RequestOptions, RequestOptionsWithDefaults } from './internal-types'
 import { ChunkedFile, UploadCallback } from './public-types'
 
@@ -8,6 +8,7 @@ export function useChunkUpload<T>(url: string, options: RequestOptions = {}) {
     chunkSize: DEFAULT_CHUNKSIZE,
     headers: {},
     progressPollInterval: 500,
+    withCredentials: false,
   }
   const opt: RequestOptionsWithDefaults = {
     ...defaultOptions,

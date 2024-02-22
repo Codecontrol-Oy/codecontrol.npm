@@ -1,6 +1,6 @@
-import { Chunk, ChunkedFile, ChunkedUploadSuccess, UploadCallback } from './public-types'
-import { RequestOptionsWithDefaults } from './internal-types'
 import { UploadFailedError } from './UploadFailedError'
+import { RequestOptionsWithDefaults } from './internal-types'
+import { Chunk, ChunkedFile, ChunkedUploadSuccess, UploadCallback } from './public-types'
 
 export function getChunkedFile(file: File, chunkSize: number, uid: string, callback?: UploadCallback): ChunkedFile {
   let start = 0
@@ -52,9 +52,13 @@ async function uploadFileChunk<T>(
       resolve(xhr.readyState === 4 && Math.floor(xhr.status / 100) === 2)
     })
     xhr.open('POST', url, true)
+
+    //xhr headers and withCredentials need to be after open
     if (options.headers.Authorization) {
       xhr.setRequestHeader('Authorization', options.headers.Authorization)
     }
+    xhr.withCredentials = options.withCredentials
+
     xhr.send(data)
   })
 
